@@ -1,4 +1,3 @@
-python.py
 import sys
 import re
 import json
@@ -13,8 +12,7 @@ class MainWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle("Kalkulator")
-        self.setFixedHeight(400)
-        self.setMaximumWidth(400)
+        self.setFixedSize(350,400)
             
         appIcon = QIcon("./icons/icon.png")
         self.setWindowIcon(appIcon)
@@ -22,24 +20,59 @@ class MainWindow(QWidget):
         calHistory = []
 
         class Button:
-            def __init__(self, text, icon="none", type="def"):
+            def __init__(self, text, icon="none", type="def", clicked=None):
                 self.text = text
                 self.type = type
                 self.icon = icon
                 self.obj = QPushButton(text)
+                self.obj.setFixedHeight(50)
+                self.obj.setFixedWidth(80)
+                self.obj.setStyleSheet("font-size: 20px;")
+                if clicked != None:
+                    print("tak")
                 if type == "empty":
                     self.obj.setEnabled(False)
 
-        buttons = [
-            [Button("",type="empty"), Button("CE"), Button("C"), Button("", icon="./icons/icon.png")],
-            [],
-            [],
-            [],
-            [],
-            []
+            def getObj(self):
+                return self.obj
+
+        self.buttons = [
+            {"empty1":Button("",type="empty"), "CE":Button("CE"), "C":Button("C"), "backspace":Button("", icon="./icons/icon.png")},
+            {"empty2":Button("",type="empty"), "square":Button("x²"), "root":Button("√x"), "divine":Button("/")},
+            {"7":Button("7"), "8":Button("8"), "9":Button("9"), "multiply":Button("x")},
+            {"4":Button("4"), "5":Button("5"), "6":Button("6"), "sub":Button("-")},
+            {"1":Button("1"), "2":Button("2"), "3":Button("3"), "add":Button("+")},
+            {"empty3":Button("",type="empty"), "0":Button("0"), "dot":Button(","), "equal":Button("=")}
         ]
 
-    # for x in range(0,)
+        mainLayout = QVBoxLayout()
+    
+        btLayout = QGridLayout()
+
+        display = QLineEdit()
+        display.setReadOnly(True)
+        display.setFixedHeight(50)
+        display.setStyleSheet("font-size: 30px;")
+        display.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.display = display
+
+        self.display.setText("0")
+
+        def addButtons():
+            row = 0
+            col = 0
+            for el in self.buttons:
+                for e in el:
+                    btLayout.addWidget(el[e].getObj(), row, col)
+                    col += 1
+                    if col == 4:
+                        col = 0
+                row += 1
+        addButtons()
+
+        mainLayout.addWidget(display)
+        mainLayout.addLayout(btLayout)
+        self.setLayout(mainLayout)
 
 
 
