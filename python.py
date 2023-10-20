@@ -32,6 +32,11 @@ class MainWindow(QWidget):
                 self.commaUsed = False
 
             def addChar(self, char):
+
+                def add(char):
+                    self.line += char
+                    self.lastSign = char
+
                 allowAdd = True
 
                 if (char == "/" or char == "x" or char == "-" or char == "+" or char == "²" or char == "√") and (self.lastSign == "²" or self.lastSign == "√"):
@@ -41,19 +46,28 @@ class MainWindow(QWidget):
                 if (char == "²" or char == "√" or char == "/" or char == "x" or char == "-" or char == "+" or char == "0") and self.line == "":
                     allowAdd = False
                 if char == ",":
+                    if self.lastSign == "":
+                        add("0")
                     if self.commaUsed == True:
                         allowAdd = False
                     self.commaUsed = True
-                if allowAdd == True:
-                    self.line += char
-                    self.lastSign = char
+                
+                
                 if char == "C":
                     self.line = ""
                     self.commaUsed = False
                 if char == "backspace":
-                    if self.line[-1] == ",":
-                        self.commaUsed = False
-                    self.line = self.line[:-1]
+                    allowAdd = False
+                    if len(self.line) > 0:
+                        if len(self.line) == 1:
+                            self.lastSign = ""
+                        if self.line[-1] == ",":
+                            self.commaUsed = False
+
+                        self.line = self.line[:-1]
+                
+                if allowAdd == True:
+                    add(char)
                 self.obj.setText(self.line)
 
             def getObj(self):
@@ -78,7 +92,7 @@ class MainWindow(QWidget):
                 else:
                     self.value = value
                 if(clicked != None):
-                    if type == "Num" or type == "Sign" or type == "LowSign":
+                    if type == "Num" or type == "Sign" or type == "LowSign" or type == "backspace":
                         self.obj.clicked.connect(clicked(self))
                     else:
                         self.obj.clicked.connect(clicked)
@@ -95,12 +109,12 @@ class MainWindow(QWidget):
                 return self.value
 
         self.buttons = [
-            {"empty1":Button("",type="empty"), "empty4":Button("",type="empty"), "C":Button("C"), "backspace":Button("", icon="./icons/backspace.png")},
-            {"empty2":Button("",type="empty"), "square":Button("x²", "Num", self.inputNumber, value="²"), "root":Button("√x", "Num", self.inputNumber, value="√"), "divine":Button("/", "Num", self.inputNumber)},
-            {"7":Button("7", "Num", self.inputNumber), "8":Button("8", "Num", self.inputNumber), "9":Button("9", "Num", self.inputNumber), "multiply":Button("x", "Num", self.inputNumber)},
-            {"4":Button("4", "Num", self.inputNumber), "5":Button("5", "Num", self.inputNumber), "6":Button("6", "Num", self.inputNumber), "sub":Button("-", "Num", self.inputNumber)},
-            {"1":Button("1", "Num", self.inputNumber), "2":Button("2", "Num", self.inputNumber), "3":Button("3", "Num", self.inputNumber), "add":Button("+", "Num", self.inputNumber)},
-            {"empty3":Button("",type="empty"), "0":Button("0", "Num", self.inputNumber), "dot":Button(",", "Num", self.inputNumber), "equal":Button("=")}
+            {"empty1":Button("",type="empty"), "empty4":Button("",type="empty"), "C":Button("C"), "backspace":Button("", "backspace", self.inputDef, icon="./icons/backspace.png", value="backspace")},
+            {"empty2":Button("",type="empty"), "square":Button("x²", "Num", self.inputDef, value="²"), "root":Button("√x", "Num", self.inputDef, value="√"), "divine":Button("/", "Num", self.inputDef)},
+            {"7":Button("7", "Num", self.inputDef), "8":Button("8", "Num", self.inputDef), "9":Button("9", "Num", self.inputDef), "multiply":Button("x", "Num", self.inputDef)},
+            {"4":Button("4", "Num", self.inputDef), "5":Button("5", "Num", self.inputDef), "6":Button("6", "Num", self.inputDef), "sub":Button("-", "Num", self.inputDef)},
+            {"1":Button("1", "Num", self.inputDef), "2":Button("2", "Num", self.inputDef), "3":Button("3", "Num", self.inputDef), "add":Button("+", "Num", self.inputDef)},
+            {"empty3":Button("",type="empty"), "0":Button("0", "Num", self.inputDef), "dot":Button(",", "Num", self.inputDef), "equal":Button("=")}
         ]
 
         mainLayout = QVBoxLayout()
@@ -123,7 +137,7 @@ class MainWindow(QWidget):
         mainLayout.addLayout(btLayout)
         self.setLayout(mainLayout)
 
-    def inputNumber(self, button):
+    def inputDef(self, button):
         def addValue():
             self.display.addChar(button.getValue())
         return addValue
