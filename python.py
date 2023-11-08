@@ -31,6 +31,9 @@ class MainWindow(QWidget):
                 self.lastSign = ""
                 self.commaUsed = False
 
+            def calculate(self):
+                print(self.line.find("x"))
+
             def addChar(self, char):
 
                 def add(char):
@@ -46,7 +49,7 @@ class MainWindow(QWidget):
                 if (char == "²" or char == "√" or char == "/" or char == "x" or char == "-" or char == "+" or char == "0") and self.line == "":
                     allowAdd = False
                 if char == ",":
-                    if self.lastSign == "":
+                    if self.lastSign == "" or self.lastSign == "²" or self.lastSign == "√" or self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+":
                         add("0")
                     if self.commaUsed == True:
                         allowAdd = False
@@ -114,7 +117,7 @@ class MainWindow(QWidget):
             {"7":Button("7", "Num", self.inputDef), "8":Button("8", "Num", self.inputDef), "9":Button("9", "Num", self.inputDef), "multiply":Button("x", "Num", self.inputDef)},
             {"4":Button("4", "Num", self.inputDef), "5":Button("5", "Num", self.inputDef), "6":Button("6", "Num", self.inputDef), "sub":Button("-", "Num", self.inputDef)},
             {"1":Button("1", "Num", self.inputDef), "2":Button("2", "Num", self.inputDef), "3":Button("3", "Num", self.inputDef), "add":Button("+", "Num", self.inputDef)},
-            {"empty3":Button("",type="empty"), "0":Button("0", "Num", self.inputDef), "dot":Button(",", "Num", self.inputDef), "equal":Button("=")}
+            {"empty3":Button("",type="empty"), "0":Button("0", "Num", self.inputDef), "dot":Button(",", "Num", self.inputDef), "equal":Button("=", self.calcualte)}
         ]
 
         mainLayout = QVBoxLayout()
@@ -141,6 +144,13 @@ class MainWindow(QWidget):
         def addValue():
             self.display.addChar(button.getValue())
         return addValue
+    
+    def calcualte(self):
+        def findCalcReplace(toFind, string):
+            signPlace = string.find(toFind)
+            if signPlace != -1:
+                pass #TODO
+            
 
 
 
