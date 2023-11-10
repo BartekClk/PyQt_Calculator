@@ -31,9 +31,6 @@ class MainWindow(QWidget):
                 self.lastSign = ""
                 self.commaUsed = False
 
-            def calculate(self):
-                print(self.line.find("x"))
-
             def addChar(self, char):
 
                 def add(char):
@@ -44,11 +41,13 @@ class MainWindow(QWidget):
 
                 if (char == "/" or char == "x" or char == "-" or char == "+" or char == "²" or char == "√") and (self.lastSign == "²" or self.lastSign == "√"):
                     allowAdd = False
-                if (char == "/" or char == "x" or char == "-" or char == "+") and (self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+" or self.lastSign == ","):
+                if (char == "/" or char == "x" or char == "+") and (self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+" or self.lastSign == ","):
                     self.line = self.line[:-1]
-                if (char == "²" or char == "√" or char == "/" or char == "x" or char == "-" or char == "+" or char == "0") and self.line == "":
+                if (char == "²" or char == "/" or char == "x" or char == "-" or char == "+" or char == "0") and self.line == "":
                     allowAdd = False
-                if char == ",":
+                if char == "√" and self.lastSign.isnumeric():
+                    add("x")
+                if char == ".":
                     if self.lastSign == "" or self.lastSign == "²" or self.lastSign == "√" or self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+":
                         add("0")
                     if self.commaUsed == True:
@@ -117,7 +116,7 @@ class MainWindow(QWidget):
             {"7":Button("7", "Num", self.inputDef), "8":Button("8", "Num", self.inputDef), "9":Button("9", "Num", self.inputDef), "multiply":Button("x", "Num", self.inputDef)},
             {"4":Button("4", "Num", self.inputDef), "5":Button("5", "Num", self.inputDef), "6":Button("6", "Num", self.inputDef), "sub":Button("-", "Num", self.inputDef)},
             {"1":Button("1", "Num", self.inputDef), "2":Button("2", "Num", self.inputDef), "3":Button("3", "Num", self.inputDef), "add":Button("+", "Num", self.inputDef)},
-            {"empty3":Button("",type="empty"), "0":Button("0", "Num", self.inputDef), "dot":Button(",", "Num", self.inputDef), "equal":Button("=", self.calcualte)}
+            {"empty3":Button("",type="empty"), "0":Button("0", "Num", self.inputDef), "dot":Button(",", "Num", self.inputDef, value="."), "equal":Button("=", "equal", self.calcualte)}
         ]
 
         mainLayout = QVBoxLayout()
@@ -147,9 +146,71 @@ class MainWindow(QWidget):
     
     def calcualte(self):
         def findCalcReplace(toFind, string):
-            signPlace = string.find(toFind)
-            if signPlace != -1:
-                pass #TODO
+            while(string.find(toFind) != -1):
+                signPlace = string.find(toFind)
+                signBefore = -2
+                signAfter = -2
+                if toFind == "x" or toFind == "/" or toFind == "+" or toFind == "-":
+                    if signPlace != -1:
+                        i = signPlace-1
+                        while(i!=-1):
+                            if string[i] == "+" or string[i] == "-" or string[i] == "x" or string[i] == "/":
+                                signBefore = i
+                                break
+                            if i == 0:
+                                signBefore = -1
+                                break
+                            i-=1
+
+                        i = signPlace+1
+                        while(i!=len(string)):
+                            if string[i] == "+" or string[i] == "-" or string[i] == "x" or string[i] == "/":
+                                signAfter = i
+                                break
+                            if i == len(string)-1:
+                                signAfter = len(string)
+                                break
+                            i+=1
+
+                    firstValue = string[signBefore+1:signPlace]
+                    secondValue = string[signPlace+1:signAfter]
+
+                    toReplace = firstValue + toFind + secondValue
+                    
+                    if firstValue != "" and secondValue == "":
+                        secondValue = firstValue
+                    
+                    if firstValue == "":
+                        firstValue = 0
+                    if secondValue == "":
+                        secondValue = 0
+
+                    if float(firstValue)%1 == 0:
+                        firstValue = int(firstValue)
+                    else:
+                        firstValue = float(firstValue)
+
+                    if float(secondValue)%1 == 0:
+                        secondValue = int(secondValue)
+                    else:
+                        secondValue = float(secondValue)
+
+                    result = firstValue*secondValue
+
+                    string = string.replace(toReplace, str(result))
+
+                    self.display.obj.setText(string)
+                
+
+
+
+            else:
+                return False
+
+
+                
+
+        findCalcReplace("x", self.display.line)
             
 
 
