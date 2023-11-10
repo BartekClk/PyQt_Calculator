@@ -72,6 +72,10 @@ class MainWindow(QWidget):
                     add(char)
                 self.obj.setText(self.line)
 
+            def setLine(self, line):
+                self.line = line
+                self.obj.setText(self.line)
+
             def getObj(self):
                 return self.obj
             
@@ -146,36 +150,63 @@ class MainWindow(QWidget):
     
     def calcualte(self):
         def findCalcReplace(toFind, string):
-            while(string.find(toFind) != -1):
-                signPlace = string.find(toFind)
-                signBefore = -2
-                signAfter = -2
-                if toFind == "x" or toFind == "/" or toFind == "+" or toFind == "-":
-                    if signPlace != -1:
-                        i = signPlace-1
+            while(string.find(toFind[0]) != -1 or string.find(toFind[1]) != -1):
+                def signBefore(sign_place):
+                    if sign_place != -1:
+                        sign_before = -2
+                        i = sign_place-1
                         while(i!=-1):
                             if string[i] == "+" or string[i] == "-" or string[i] == "x" or string[i] == "/":
-                                signBefore = i
+                                sign_before = i
                                 break
                             if i == 0:
-                                signBefore = -1
+                                sign_before = -1
                                 break
                             i-=1
-
-                        i = signPlace+1
+                        return sign_before
+                    else:
+                        return False
+                
+                def signAfter(sign_place):
+                    if sign_place != -1:
+                        sign_after = False
+                        i = sign_place+1
                         while(i!=len(string)):
                             if string[i] == "+" or string[i] == "-" or string[i] == "x" or string[i] == "/":
-                                signAfter = i
+                                sign_after = i
                                 break
                             if i == len(string)-1:
-                                signAfter = len(string)
+                                sign_after = len(string)
                                 break
                             i+=1
+                        return sign_after
+                    else:
+                        return False
+                    
+                if  string.find(toFind[0]) == -1:
+                    sign_place = string.find(toFind[1])
+                    find = toFind[1]
+                elif string.find(toFind[1]) == -1:
+                    sign_place = string.find(toFind[0])
+                    find = toFind[0]
+                else:
+                    if  string.find(toFind[0]) < string.find(toFind[1]):
+                        sign_place = string.find(toFind[0])
+                        find = toFind[0]
+                    else:
+                        sign_place = string.find(toFind[1])
+                        find = toFind[1]
+                print(find)
+                
+                if find == "x" or find == "/" or find == "+" or find == "-":
+                    
+                    sign_before = signBefore(sign_place)
+                    sign_after = signAfter(sign_place)
 
-                    firstValue = string[signBefore+1:signPlace]
-                    secondValue = string[signPlace+1:signAfter]
+                    firstValue = string[sign_before+1:sign_place]
+                    secondValue = string[sign_place+1:sign_after]
 
-                    toReplace = firstValue + toFind + secondValue
+                    toReplace = firstValue + find + secondValue
                     
                     if firstValue != "" and secondValue == "":
                         secondValue = firstValue
@@ -185,21 +216,27 @@ class MainWindow(QWidget):
                     if secondValue == "":
                         secondValue = 0
 
-                    if float(firstValue)%1 == 0:
-                        firstValue = int(firstValue)
-                    else:
-                        firstValue = float(firstValue)
+                    firstValue = float(firstValue)
+                    secondValue = float(secondValue)
+                    
+                    if find == "+":
+                        result = firstValue+secondValue
+                    elif find == "-":
+                        result = firstValue-secondValue
+                    elif find == "/":
+                        result = firstValue/secondValue
+                    elif find == "x":
+                        result = firstValue*secondValue
 
-                    if float(secondValue)%1 == 0:
-                        secondValue = int(secondValue)
+                    if result%1 == 0:
+                        result = int(result)
                     else:
-                        secondValue = float(secondValue)
-
-                    result = firstValue*secondValue
+                        result = float(result)
 
                     string = string.replace(toReplace, str(result))
 
-                    self.display.obj.setText(string)
+                    self.display.setLine(string)
+                break
                 
 
 
@@ -210,7 +247,10 @@ class MainWindow(QWidget):
 
                 
 
-        findCalcReplace("x", self.display.line)
+        findCalcReplace(["x", "/"], self.display.line)
+        # findCalcReplace("/", self.display.line)
+        # findCalcReplace("+", self.display.line)
+        # findCalcReplace("-", self.display.line)
             
 
 
