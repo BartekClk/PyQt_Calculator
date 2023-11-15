@@ -43,7 +43,7 @@ class MainWindow(QWidget):
                     allowAdd = False
                 if (char == "/" or char == "x" or char == "+") and (self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+" or self.lastSign == ","):
                     self.line = self.line[:-1]
-                if (char == "²" or char == "/" or char == "x" or char == "-" or char == "+" or char == "0") and self.line == "":
+                if (char == "²" or char == "/" or char == "x" or char == "+") and self.line == "":
                     allowAdd = False
                 if char == "√" and self.lastSign.isnumeric():
                     add("x")
@@ -150,7 +150,7 @@ class MainWindow(QWidget):
     
     def calcualte(self):
         def findCalcReplace(toFind, string):
-            while(string.find(toFind[0]) != -1 or string.find(toFind[1]) != -1):
+            while((string.find(toFind[0]) != -1 or string.find(toFind[1]) != -1)):
                 def signBefore(sign_place):
                     if sign_place != -1:
                         sign_before = -2
@@ -183,6 +183,8 @@ class MainWindow(QWidget):
                     else:
                         return False
                     
+                # def todo
+                    
                 if  string.find(toFind[0]) == -1:
                     sign_place = string.find(toFind[1])
                     find = toFind[1]
@@ -196,7 +198,6 @@ class MainWindow(QWidget):
                     else:
                         sign_place = string.find(toFind[1])
                         find = toFind[1]
-                print(find)
                 
                 if find == "x" or find == "/" or find == "+" or find == "-":
                     
@@ -223,6 +224,7 @@ class MainWindow(QWidget):
                         result = firstValue+secondValue
                     elif find == "-":
                         result = firstValue-secondValue
+                        print(firstValue, secondValue, result)
                     elif find == "/":
                         result = firstValue/secondValue
                     elif find == "x":
@@ -231,13 +233,12 @@ class MainWindow(QWidget):
                     if result%1 == 0:
                         result = int(result)
                     else:
-                        result = float(result)
+                        result = round(float(result),4)
 
                     string = string.replace(toReplace, str(result))
 
                     self.display.setLine(string)
                 break
-                
 
 
 
@@ -248,6 +249,7 @@ class MainWindow(QWidget):
                 
 
         findCalcReplace(["x", "/"], self.display.line)
+        findCalcReplace(["+", "-"], self.display.line)
         # findCalcReplace("/", self.display.line)
         # findCalcReplace("+", self.display.line)
         # findCalcReplace("-", self.display.line)
