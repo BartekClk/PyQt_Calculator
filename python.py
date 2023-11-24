@@ -30,12 +30,29 @@ class MainWindow(QWidget):
                 self.line = ""
                 self.lastSign = ""
                 self.commaUsed = False
+                self.calcStack = []
+                self.toAdd = ""
 
             def addChar(self, char):
 
                 def add(char):
-                    self.line += char
-                    self.lastSign = char
+                    if(char.isnumeric() or char == "."):
+                        self.toAdd += char
+                        self.lastSign = char
+                        self.line += char
+                    if(char == "²" or char == "√" or char == "/" or char == "x" or char == "-" or char == "+"):
+                        self.calcStack.append(self.toAdd)
+                        self.calcStack.append(char)
+                        self.toAdd = ""
+                        self.commaUsed = False
+                        self.lastSign = char
+                        self.line += char
+                    if(char == "backspace"):
+                        if self.toAdd != "":
+                            self.calcStack.append(self.toAdd)
+                        self.toAdd = ""
+                    
+                    print(self.calcStack, " | ", self.toAdd, " | ", self.lastSign)
 
                 allowAdd = True
 
@@ -60,13 +77,16 @@ class MainWindow(QWidget):
                     self.commaUsed = False
                 if char == "backspace":
                     allowAdd = False
-                    if len(self.line) > 0:
-                        if len(self.line) == 1:
-                            self.lastSign = ""
-                        if self.line[-1] == ",":
-                            self.commaUsed = False
-
-                        self.line = self.line[:-1]
+                    add("backspace")
+                    if len(self.calcStack) > 0:
+                        if len(self.calcStack[-1]) == 1:
+                            self.calcStack.pop()
+                        else:
+                            self.calcStack[-1] = self.calcStack[-1][:-1]
+                        
+                    for el in self.calcStack:
+                        self.line = ""
+                        self.line += el
                 
                 if allowAdd == True:
                     add(char)
@@ -149,110 +169,7 @@ class MainWindow(QWidget):
         return addValue
     
     def calcualte(self):
-        def findCalcReplace(toFind, string):
-            while((string.find(toFind[0]) != -1 or string.find(toFind[1]) != -1)):
-                def signBefore(sign_place):
-                    if sign_place != -1:
-                        sign_before = -2
-                        i = sign_place-1
-                        while(i!=-1):
-                            if string[i] == "+" or string[i] == "-" or string[i] == "x" or string[i] == "/":
-                                sign_before = i
-                                break
-                            if i == 0:
-                                sign_before = -1
-                                break
-                            i-=1
-                        return sign_before
-                    else:
-                        return False
-                
-                def signAfter(sign_place):
-                    if sign_place != -1:
-                        sign_after = False
-                        i = sign_place+1
-                        while(i!=len(string)):
-                            if string[i] == "+" or string[i] == "-" or string[i] == "x" or string[i] == "/":
-                                sign_after = i
-                                break
-                            if i == len(string)-1:
-                                sign_after = len(string)
-                                break
-                            i+=1
-                        return sign_after
-                    else:
-                        return False
-                    
-                # def todo
-                    
-                if  string.find(toFind[0]) == -1:
-                    sign_place = string.find(toFind[1])
-                    find = toFind[1]
-                elif string.find(toFind[1]) == -1:
-                    sign_place = string.find(toFind[0])
-                    find = toFind[0]
-                else:
-                    if  string.find(toFind[0]) < string.find(toFind[1]):
-                        sign_place = string.find(toFind[0])
-                        find = toFind[0]
-                    else:
-                        sign_place = string.find(toFind[1])
-                        find = toFind[1]
-                
-                if find == "x" or find == "/" or find == "+" or find == "-":
-                    
-                    sign_before = signBefore(sign_place)
-                    sign_after = signAfter(sign_place)
-
-                    firstValue = string[sign_before+1:sign_place]
-                    secondValue = string[sign_place+1:sign_after]
-
-                    toReplace = firstValue + find + secondValue
-                    
-                    if firstValue != "" and secondValue == "":
-                        secondValue = firstValue
-                    
-                    if firstValue == "":
-                        firstValue = 0
-                    if secondValue == "":
-                        secondValue = 0
-
-                    firstValue = float(firstValue)
-                    secondValue = float(secondValue)
-                    
-                    if find == "+":
-                        result = firstValue+secondValue
-                    elif find == "-":
-                        result = firstValue-secondValue
-                        print(firstValue, secondValue, result)
-                    elif find == "/":
-                        result = firstValue/secondValue
-                    elif find == "x":
-                        result = firstValue*secondValue
-
-                    if result%1 == 0:
-                        result = int(result)
-                    else:
-                        result = round(float(result),4)
-
-                    string = string.replace(toReplace, str(result))
-
-                    self.display.setLine(string)
-                break
-
-
-
-            else:
-                return False
-
-
-                
-
-        findCalcReplace(["x", "/"], self.display.line)
-        findCalcReplace(["+", "-"], self.display.line)
-        # findCalcReplace("/", self.display.line)
-        # findCalcReplace("+", self.display.line)
-        # findCalcReplace("-", self.display.line)
+        print("calc")
             
 
 
