@@ -31,34 +31,33 @@ class MainWindow(QWidget):
                 self.lastSign = ""
                 self.commaUsed = False
                 self.calcStack = []
-                self.toAdd = ""
+
+            def lineReload(self):
+                self.line = ""
+                for el in self.calcStack:
+                    self.line += el
 
             def addChar(self, char):
 
                 def add(char):
                     if(char.isnumeric() or char == "."):
-                        self.toAdd += char
+                        if(len(self.calcStack)==0 or (self.calcStack[-1][-1].isnumeric() == False and self.calcStack[-1][-1] != ".")):
+                            self.calcStack.append(char)
+                        elif(self.calcStack[-1][-1].isnumeric() or self.calcStack[-1][-1] == "."):
+                            self.calcStack[-1] += char
                         self.lastSign = char
                         self.line += char
                     if(char == "²" or char == "√" or char == "/" or char == "x" or char == "-" or char == "+"):
-                        self.calcStack.append(self.toAdd)
                         self.calcStack.append(char)
-                        self.toAdd = ""
                         self.commaUsed = False
                         self.lastSign = char
                         self.line += char
-                    if(char == "backspace"):
-                        if self.toAdd != "":
-                            self.calcStack.append(self.toAdd)
-                        self.toAdd = ""
-                    
-                    print(self.calcStack, " | ", self.toAdd, " | ", self.lastSign)
 
                 allowAdd = True
 
                 if (char == "/" or char == "x" or char == "-" or char == "+" or char == "²" or char == "√") and (self.lastSign == "²" or self.lastSign == "√"):
                     allowAdd = False
-                if (char == "/" or char == "x" or char == "+") and (self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+" or self.lastSign == ","):
+                if (char == "/" or char == "x" or char == "+") and (self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+" or self.lastSign == "."):
                     self.line = self.line[:-1]
                 if (char == "²" or char == "/" or char == "x" or char == "+") and self.line == "":
                     allowAdd = False
@@ -67,9 +66,14 @@ class MainWindow(QWidget):
                 if char == ".":
                     if self.lastSign == "" or self.lastSign == "²" or self.lastSign == "√" or self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+":
                         add("0")
+                    if(len(self.calcStack)!=0 and self.calcStack[-1].find(".")==1):
+                        allowAdd = False
+                        self.commaUsed = True
                     if self.commaUsed == True:
                         allowAdd = False
                     self.commaUsed = True
+                
+                
                 
                 
                 if char == "C":
@@ -81,12 +85,18 @@ class MainWindow(QWidget):
                     if len(self.calcStack) > 0:
                         if len(self.calcStack[-1]) == 1:
                             self.calcStack.pop()
+                            if len(self.calcStack) == 0:
+                                self.lastSign = ""
+                            else:
+                                if self.calcStack[-1][-1] == ".":
+                                    self.commaUsed = False
+                                self.lastSign = self.calcStack[-1][-1]
                         else:
                             self.calcStack[-1] = self.calcStack[-1][:-1]
-                        
-                    for el in self.calcStack:
-                        self.line = ""
-                        self.line += el
+                            self.lastSign = self.calcStack[-1][-1]
+                    print(self.calcStack)
+
+                    self.lineReload()
                 
                 if allowAdd == True:
                     add(char)
