@@ -31,6 +31,7 @@ class MainWindow(QWidget):
                 self.lastSign = ""
                 self.commaUsed = False
                 self.calcStack = []
+                self.stop = False
 
             def lineReload(self):
                 self.line = ""
@@ -180,6 +181,14 @@ class MainWindow(QWidget):
         mainLayout.addLayout(btLayout)
         self.setLayout(mainLayout)
 
+    def alert(self, text):
+        msg = QMessageBox()
+        msg.setWindowTitle("Błąd")
+        msg.setText(text)
+        msg.setIcon(QMessageBox.Icon.Critical)
+        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+        result = msg.exec()
+
     def inputDef(self, button):
         def addValue():
             self.display.addChar(button.getValue())
@@ -195,6 +204,7 @@ class MainWindow(QWidget):
         return clear
 
     def calcualte(self):
+        self.display.stop = False
         def index(el, array):
             if el in array:
                 return array.index(el)
@@ -212,13 +222,15 @@ class MainWindow(QWidget):
                 i = calcStack.index("-")
                 if calcStack[i+1][0].isnumeric() == True:
                     calcStack[i+1] = "-" + calcStack[i+1]
-                    if calcStack[i-1][-1].isnumeric() == True:
+                    if calcStack[i-1][-1].isnumeric() == True and i!=0:
                         calcStack[i] = "+"
                     else:
                         calcStack.pop(i)
             
         def calc(find):
+            print(calcStack)
             minusRewrite()
+            print(calcStack)
             index = calcStack.index(find)
             if find == "²":
                 minus = False
@@ -236,9 +248,13 @@ class MainWindow(QWidget):
                 calcStack.pop(index-1)
                 calcStack.pop(index)
             elif find == "/":
-                calcStack[index] = str(floatOrInt(float(calcStack[index-1])/float(calcStack[index+1])))
-                calcStack.pop(index-1)
-                calcStack.pop(index)
+                if calcStack[index+1] == "0":
+                    self.alert("Nie można dzielić przez 0")
+                    self.display.stop = True
+                else:
+                    calcStack[index] = str(floatOrInt(float(calcStack[index-1])/float(calcStack[index+1])))
+                    calcStack.pop(index-1)
+                    calcStack.pop(index)
             elif find == "+":
                 calcStack[index] = str(floatOrInt(float(calcStack[index-1])+float(calcStack[index+1])))
                 calcStack.pop(index-1)
@@ -251,6 +267,8 @@ class MainWindow(QWidget):
 
         def calcFirst(find):
             while find[0] in calcStack or find[1] in calcStack:
+                if self.display.stop == True:
+                    break
                 if index(find[0], calcStack) == -1:
                     calc(find[1])
                 elif index(find[1], calcStack) == -1:
