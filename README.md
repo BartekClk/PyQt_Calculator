@@ -1,1 +1,1 @@
-## Simple calculator created using PyQt6 in Python
+# Simple calculator created using PyQt6 in Python

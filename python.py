@@ -36,11 +36,12 @@ class MainWindow(QWidget):
                 self.line = ""
                 for el in self.calcStack:
                     self.line += el
+                self.obj.setText(self.line)
 
             def addChar(self, char):
 
                 def add(char):
-                    if(char.isnumeric() or char == "."):
+                    if((char.isnumeric() or char == ".") and char != "²"):
                         if(len(self.calcStack)==0 or (self.calcStack[-1][-1].isnumeric() == False and self.calcStack[-1][-1] != ".")):
                             self.calcStack.append(char)
                         elif(self.calcStack[-1][-1].isnumeric() or self.calcStack[-1][-1] == "."):
@@ -52,32 +53,43 @@ class MainWindow(QWidget):
                         self.commaUsed = False
                         self.lastSign = char
                         self.line += char
-
+                
                 allowAdd = True
-
-                if (char == "/" or char == "x" or char == "-" or char == "+" or char == "²" or char == "√") and (self.lastSign == "²" or self.lastSign == "√"):
+                
+                if (char == self.lastSign and char.isnumeric() == False):
                     allowAdd = False
-                if (char == "/" or char == "x" or char == "+") and (self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+" or self.lastSign == "."):
-                    self.line = self.line[:-1]
-                if (char == "²" or char == "/" or char == "x" or char == "+") and self.line == "":
+                if (char == "²") and (self.lastSign == "/" or self.lastSign == "x"or self.lastSign == "+"):
                     allowAdd = False
+                if (char == "-" and self.lastSign == "√"):
+                    allowAdd = False
+                if (char.isnumeric() == False and self.lastSign == "."):
+                        self.commaUsed = False
+                        self.calcStack[-1] = self.calcStack[-1][:-1]
+                if (char == "/" or char == "x" or char == "+") and (self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+"):
+                    if(char != self.lastSign):
+                        self.calcStack.pop()
+                    if(len(self.calcStack) > 1) and char == self.calcStack[-1]:
+                        allowAdd = False
+                if (char == "²" or char == "/" or char == "x" or char == "+") and len(self.calcStack)==0:
+                    allowAdd = False
+                if char.isnumeric() and self.lastSign == "²":
+                    add("x")
+                    self.lastSign = "x"
                 if char == "√" and self.lastSign.isnumeric():
                     add("x")
+                    self.lastSign = "x"
                 if char == ".":
                     if self.lastSign == "" or self.lastSign == "²" or self.lastSign == "√" or self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+":
                         add("0")
-                    if(len(self.calcStack)!=0 and self.calcStack[-1].find(".")==1):
+                    if(len(self.calcStack)!=0 and self.calcStack[-1].find(".")!=-1):
                         allowAdd = False
                         self.commaUsed = True
-                    if self.commaUsed == True:
-                        allowAdd = False
-                    self.commaUsed = True
                 
                 
                 
                 
                 if char == "C":
-                    self.line = ""
+                    self.calcStack = ""
                     self.commaUsed = False
                 if char == "backspace":
                     allowAdd = False
@@ -94,17 +106,12 @@ class MainWindow(QWidget):
                         else:
                             self.calcStack[-1] = self.calcStack[-1][:-1]
                             self.lastSign = self.calcStack[-1][-1]
-                    print(self.calcStack)
-
                     self.lineReload()
-                
+
                 if allowAdd == True:
                     add(char)
-                self.obj.setText(self.line)
+                self.lineReload()
 
-            def setLine(self, line):
-                self.line = line
-                self.obj.setText(self.line)
 
             def getObj(self):
                 return self.obj
@@ -145,7 +152,7 @@ class MainWindow(QWidget):
                 return self.value
 
         self.buttons = [
-            {"empty1":Button("",type="empty"), "empty4":Button("",type="empty"), "C":Button("C"), "backspace":Button("", "backspace", self.inputDef, icon="./icons/backspace.png", value="backspace")},
+            {"empty1":Button("",type="empty"), "empty4":Button("",type="empty"), "C":Button("C", "C", self.clear()), "backspace":Button("", "backspace", self.inputDef, icon="./icons/backspace.png", value="backspace")},
             {"empty2":Button("",type="empty"), "square":Button("x²", "Num", self.inputDef, value="²"), "root":Button("√x", "Num", self.inputDef, value="√"), "divine":Button("/", "Num", self.inputDef)},
             {"7":Button("7", "Num", self.inputDef), "8":Button("8", "Num", self.inputDef), "9":Button("9", "Num", self.inputDef), "multiply":Button("x", "Num", self.inputDef)},
             {"4":Button("4", "Num", self.inputDef), "5":Button("5", "Num", self.inputDef), "6":Button("6", "Num", self.inputDef), "sub":Button("-", "Num", self.inputDef)},
@@ -178,8 +185,96 @@ class MainWindow(QWidget):
             self.display.addChar(button.getValue())
         return addValue
     
+    def clear(self, hard=True):
+        def clear():
+            if hard == True: 
+                self.display.calcStack.clear()
+            self.display.lastSign = ""
+            self.display.commaUsed = False
+            self.display.lineReload()
+        return clear
+
     def calcualte(self):
-        print("calc")
+        def index(el, array):
+            if el in array:
+                return array.index(el)
+            else:
+                return -1
+
+        def floatOrInt(el):
+            if float(el) % 1 == 0:
+                return str(int(float(el)))
+            else:
+                return round(float(el),2)
+            
+        def minusRewrite():
+            for i in range(calcStack.count("-")):
+                i = calcStack.index("-")
+                if calcStack[i+1][0].isnumeric() == True:
+                    calcStack[i+1] = "-" + calcStack[i+1]
+                    if calcStack[i-1][-1].isnumeric() == True:
+                        calcStack[i] = "+"
+                    else:
+                        calcStack.pop(i)
+            
+        def calc(find):
+            minusRewrite()
+            index = calcStack.index(find)
+            if find == "²":
+                minus = False
+                if calcStack[index][0] == "-":
+                    minus = True
+                calcStack[index-1] = str(floatOrInt(float(calcStack[index-1])**2))
+                if minus == True:
+                    calcStack.insert(index-1, "+")
+                calcStack.pop(index)
+            elif find == "√":
+                calcStack[index+1] = str(floatOrInt(math.sqrt(float(calcStack[index+1]))))
+                calcStack.pop(index)
+            elif find == "x":
+                calcStack[index] = str(floatOrInt(float(calcStack[index-1])*float(calcStack[index+1])))
+                calcStack.pop(index-1)
+                calcStack.pop(index)
+            elif find == "/":
+                calcStack[index] = str(floatOrInt(float(calcStack[index-1])/float(calcStack[index+1])))
+                calcStack.pop(index-1)
+                calcStack.pop(index)
+            elif find == "+":
+                calcStack[index] = str(floatOrInt(float(calcStack[index-1])+float(calcStack[index+1])))
+                calcStack.pop(index-1)
+                calcStack.pop(index)
+            minusRewrite()
+
+                
+
+            self.clear(False)
+
+        def calcFirst(find):
+            while find[0] in calcStack or find[1] in calcStack:
+                if index(find[0], calcStack) == -1:
+                    calc(find[1])
+                elif index(find[1], calcStack) == -1:
+                    calc(find[0])
+                elif index(find[0], calcStack) < index(find[1], calcStack):
+                    calc(find[0])
+                else:
+                    calc(find[1])
+
+        calcStack = self.display.calcStack
+        
+        for i in range(calcStack.count("²")):
+            calc("²")
+        
+        for i in range(calcStack.count("√")):
+            calc("√")
+
+        calcFirst(["x", "/"])
+
+        for i in range(calcStack.count("+")):
+            calc("+")
+
+        self.display.lineReload()
+
             
 
 
