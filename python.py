@@ -54,6 +54,7 @@ class MainWindow(QWidget):
                         self.commaUsed = False
                         self.lastSign = char
                         self.line += char
+                    print(self.calcStack)
                 
                 allowAdd = True
                 
@@ -94,19 +95,21 @@ class MainWindow(QWidget):
                     self.commaUsed = False
                 if char == "backspace":
                     allowAdd = False
-                    add("backspace")
                     if len(self.calcStack) > 0:
-                        if len(self.calcStack[-1]) == 1:
+                        if len(self.calcStack[-1]) >= 1:
+                            # self.calcStack[-1] = self.calcStack[-1][:-1]
+                            print("a")
+                            self.calcStack[-1] = self.calcStack[-1][:-1]
+                            self.lastSign = self.calcStack[-1][-1]
+                        # if len(self.calcStack[-1]) == 1 and self.calcStack[-1][-1] != ".":
+                        else:
+                            print("b")
                             self.calcStack.pop()
                             if len(self.calcStack) == 0:
                                 self.lastSign = ""
                             else:
                                 if self.calcStack[-1][-1] == ".":
                                     self.commaUsed = False
-                                self.lastSign = self.calcStack[-1][-1]
-                        else:
-                            self.calcStack[-1] = self.calcStack[-1][:-1]
-                            self.lastSign = self.calcStack[-1][-1]
                     self.lineReload()
 
                 if allowAdd == True:
@@ -215,7 +218,7 @@ class MainWindow(QWidget):
             if float(el) % 1 == 0:
                 return str(int(float(el)))
             else:
-                return round(float(el),2)
+                return round(float(el),4)
             
         def minusRewrite():
             for i in range(calcStack.count("-")):
