@@ -54,7 +54,9 @@ class MainWindow(QWidget):
                         self.lastSign = char
                 
                 allowAdd = True
-                
+
+                if ((char == "²" or char == "/" or char == "x" or char == "+") and self.lastSign == "√" ):
+                    allowAdd = False
                 if (char == self.lastSign and char.isnumeric() == False):
                     allowAdd = False
                 if (char == "²") and (self.lastSign == "/" or self.lastSign == "x"or self.lastSign == "+"):
