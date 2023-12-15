@@ -48,13 +48,10 @@ class MainWindow(QWidget):
                         elif(self.calcStack[-1][-1].isnumeric() or self.calcStack[-1][-1] == "."):
                             self.calcStack[-1] += char
                         self.lastSign = char
-                        self.line += char
                     if(char == "²" or char == "√" or char == "/" or char == "x" or char == "-" or char == "+"):
                         self.calcStack.append(char)
                         self.commaUsed = False
                         self.lastSign = char
-                        self.line += char
-                    print(self.calcStack)
                 
                 allowAdd = True
                 
@@ -66,7 +63,6 @@ class MainWindow(QWidget):
                     allowAdd = False
                 if (char.isnumeric() == False and self.lastSign == "."):
                         self.commaUsed = False
-                        self.calcStack[-1] = self.calcStack[-1][:-1]
                 if (char == "/" or char == "x" or char == "+") and (self.lastSign == "/" or self.lastSign == "x" or self.lastSign == "-" or self.lastSign == "+"):
                     if(char != self.lastSign):
                         self.calcStack.pop()
@@ -96,14 +92,10 @@ class MainWindow(QWidget):
                 if char == "backspace":
                     allowAdd = False
                     if len(self.calcStack) > 0:
-                        if len(self.calcStack[-1]) >= 1:
-                            # self.calcStack[-1] = self.calcStack[-1][:-1]
-                            print("a")
+                        if len(self.calcStack[-1]) > 1:
                             self.calcStack[-1] = self.calcStack[-1][:-1]
                             self.lastSign = self.calcStack[-1][-1]
-                        # if len(self.calcStack[-1]) == 1 and self.calcStack[-1][-1] != ".":
                         else:
-                            print("b")
                             self.calcStack.pop()
                             if len(self.calcStack) == 0:
                                 self.lastSign = ""
@@ -231,9 +223,7 @@ class MainWindow(QWidget):
                         calcStack.pop(i)
             
         def calc(find):
-            print(calcStack)
             minusRewrite()
-            print(calcStack)
             index = calcStack.index(find)
             if find == "²":
                 minus = False
